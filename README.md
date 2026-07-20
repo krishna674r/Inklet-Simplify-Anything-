@@ -23,8 +23,7 @@ This is also my first real project exploring AI-native product design — figuri
       - **Watch out for** — anything that could catch you off guard
         - **Bottom line** — the one thing to actually know or do
         - No account required. No data stored beyond what's needed to generate the response.
-
-        ## How it works
+  ## How it works
 
         inklet is a lightweight frontend that sends user text to the Gemini API with a fixed system prompt, which forces the model into the same predictable structure every time. That structure is what makes the output trustworthy — it never free-forms, never skips a section, and never invents a "watch out for" point when there isn't one.
 
@@ -35,8 +34,7 @@ This is also my first real project exploring AI-native product design — figuri
         | `.txt` | Read directly as plain text |
         | `.pdf` | Extracted with [pdf.js](https://mozilla.github.io/pdf.js/) |
         | `.docx` | Extracted with [mammoth.js](https://github.com/mwilliamson/mammoth.js) |
-
-        ## Tech stack
+    ## Tech stack
 
         - Built with
 

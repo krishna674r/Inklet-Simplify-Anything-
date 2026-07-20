@@ -1,0 +1,6 @@
+{
+  "name": "inklet",
+  "description": "Upload or paste text and get a plain-English explanation.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
