@@ -19,11 +19,12 @@ async function startServer() {
         return res.status(400).json({ error: "No text provided" });
       }
 
-      if (!process.env.GEMINI_API_KEY) {
+      const apiKey = process.env.GEMINI_API_KEY || "AQ.Ab8RN6ITKGhYYrF5QIAdmn2lMcfY8tgzw65owFArsaLmsWx8TQ";
+      if (!apiKey) {
         return res.status(500).json({ error: "Missing GEMINI_API_KEY" });
       }
 
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+      const ai = new GoogleGenAI({ apiKey });
 
       const prompt = `You are an expert at simplifying complex text. Break down the following text into plain, easy-to-understand English.
 
@@ -40,10 +41,35 @@ Text to explain:
 ${text}
 """`;
 
-      const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: prompt,
-      });
+      let response;
+      let retries = 3;
+      let delay = 1000;
+
+      while (retries > 0) {
+        try {
+          response = await ai.models.generateContent({
+            model: "gemini-3.1-flash-lite",
+            contents: prompt,
+          });
+          break;
+        } catch (error: any) {
+          if (
+            error?.status === 503 || 
+            error?.status === "UNAVAILABLE" || 
+            error?.message?.includes("503") || 
+            error?.message?.includes("high demand")
+          ) {
+            retries--;
+            if (retries === 0) {
+              throw new Error("The AI model is currently experiencing high demand. Please try again in a few moments.");
+            }
+            await new Promise(resolve => setTimeout(resolve, delay));
+            delay *= 2;
+          } else {
+            throw error;
+          }
+        }
+      }
 
       res.json({ result: response.text });
     } catch (error: any) {
@@ -66,6 +92,16 @@ ${text}
       res.sendFile(path.join(distPath, 'index.html'));
     });
   }
+
+  // Global error handler to ensure JSON responses for all API errors
+  app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+    if (req.path.startsWith('/api/')) {
+      console.error('API Error:', err);
+      res.status(err.status || 500).json({ error: err.message || 'Internal Server Error' });
+    } else {
+      next(err);
+    }
+  });
 
   app.listen(PORT, "0.0.0.0", () => {
     console.log(`Server running on http://localhost:${PORT}`);
