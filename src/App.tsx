@@ -88,6 +88,11 @@ export default function App() {
         body: JSON.stringify({ text }),
       });
 
+      const contentType = res.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("Unexpected response from server. Please try again.");
+      }
+
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to explain text.");
       
