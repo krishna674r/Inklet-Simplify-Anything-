@@ -19,12 +19,11 @@ async function startServer() {
         return res.status(400).json({ error: "No text provided" });
       }
 
-      const apiKey = process.env.GEMINI_API_KEY || "AQ.Ab8RN6ITKGhYYrF5QIAdmn2lMcfY8tgzw65owFArsaLmsWx8TQ";
-      if (!apiKey) {
+      if (!process.env.GEMINI_API_KEY) {
         return res.status(500).json({ error: "Missing GEMINI_API_KEY" });
       }
 
-      const ai = new GoogleGenAI({ apiKey });
+      const ai = new GoogleGenAI({});
 
       const prompt = `You are an expert at simplifying complex text. Break down the following text into plain, easy-to-understand English.
 

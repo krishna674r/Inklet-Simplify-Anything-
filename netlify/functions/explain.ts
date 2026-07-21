@@ -1,35 +1,26 @@
-import type { Handler } from "@netlify/functions";
 import { GoogleGenAI } from "@google/genai";
 
-export const handler: Handler = async (event) => {
+export default async (req: Request) => {
   // Only allow POST
-  if (event.httpMethod !== "POST") {
-    return {
-      statusCode: 405,
-      body: JSON.stringify({ error: "Method not allowed" }),
-    };
+  if (req.method !== "POST") {
+    return Response.json({ error: "Method not allowed" }, { status: 405 });
   }
 
   try {
-    const { text } = JSON.parse(event.body || "{}");
+    const { text } = await req.json().catch(() => ({}));
 
     if (!text) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ error: "No text provided" }),
-      };
+      return Response.json({ error: "No text provided" }, { status: 400 });
     }
 
-    // Read the key ONLY from environment variables — never hardcode a real key here.
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-      return {
-        statusCode: 500,
-        body: JSON.stringify({ error: "Missing GEMINI_API_KEY" }),
-      };
+    if (!process.env.GEMINI_API_KEY) {
+      return Response.json({ error: "Missing GEMINI_API_KEY" }, { status: 500 });
     }
 
-    const ai = new GoogleGenAI({ apiKey });
+    // Zero-config: the SDK auto-detects GEMINI_API_KEY and the AI Gateway base URL
+    // from environment variables. Passing apiKey explicitly would bypass the gateway
+    // base URL and send the gateway credential straight to Google's API, which rejects it.
+    const ai = new GoogleGenAI({});
 
     const prompt = `You are an expert at simplifying complex text. Break down the following text into plain, easy-to-understand English.
 
@@ -79,17 +70,12 @@ ${text}
       }
     }
 
-    return {
-      statusCode: 200,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ result: response!.text }),
-    };
+    return Response.json({ result: response!.text });
   } catch (error: any) {
     console.error("Gemini API error:", error);
-    return {
-      statusCode: 500,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ error: error.message || "Failed to process text" }),
-    };
+    return Response.json(
+      { error: error.message || "Failed to process text" },
+      { status: 500 }
+    );
   }
 };
