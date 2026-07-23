@@ -1,7 +1,7 @@
 # 🚀 Inklet - Simplify Anything
 
 > **Transform complex information into crystal-clear explanations powered by Google's Gemini AI**
-
+[![Link](https://ink-let.netlify.app)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![API](https://img.shields.io/badge/powered%20by-Gemini%20API-blue.svg)](https://ai.google.dev)
 
